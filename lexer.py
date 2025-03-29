@@ -1,6 +1,6 @@
 import ply.lex as lex
 
-# Reserved Words
+# Reserved Words (excluding types like CONCERT, MOVIE)
 reserved = {
     'LIST': 'LIST',
     'EVENTS': 'EVENTS',
@@ -16,32 +16,38 @@ reserved = {
     'EVENT': 'EVENT',
     'WITH': 'WITH',
     'NEW': 'NEW',
-    'TICKETS': 'TICKETS'
+    'TICKETS': 'TICKETS',
+    'ADD': 'ADD',
+    'AT': 'AT',
+    'FROM': 'FROM',
+    'TO': 'TO',
+    'PRICE': 'PRICE'
 }
 
-# Token Definitions
+# Tokens
 tokens = [
-    'NUMBER', 'STRING', 'DATE'
-] + list(reserved.values())  # Include reserved words in tokens
+    'NUMBER', 'STRING', 'DATE', 'WORD'
+] + list(reserved.values())
 
 # Token Patterns
 t_NUMBER = r'\d+'
 
-# Date format (YYYY-MM-DD)
 def t_DATE(t):
     r'\d{4}-\d{2}-\d{2}'
     return t
 
-# Ensure reserved words are correctly recognized
 def t_STRING(t):
-    r'"[^"]*"|\b[a-zA-Z][a-zA-Z0-9_]*\b'  # Match quoted text OR single words
-    t.type = reserved.get(t.value.upper(), 'STRING')  # Check if it's a reserved word
-    t.value = t.value.strip('"')  # Remove quotes if present
+    r'"[^"]*"'
+    t.value = t.value.strip('"')
     return t
 
-t_ignore = ' \t\n'
+def t_WORD(t):
+    r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
+    t.type = reserved.get(t.value.upper(), 'WORD')  # Reserved or generic WORD
+    return t
 
-# Error Handling
+t_ignore = ' \t\r\n'
+
 def t_error(t):
     print(f"Illegal character {t.value[0]}")
     t.lexer.skip(1)
