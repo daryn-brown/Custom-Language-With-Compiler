@@ -1,165 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuickTix</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuickTix</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-    body {
-      background: #111;
-      color: #0f0;
-      font-family: monospace;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    #nav {
-      margin-bottom: 20px;
-    }
-
-    button {
-      background: #000;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 10px;
-      font-family: monospace;
-      cursor: pointer;
-    }
-
-    #home, #terminal {
-      max-width: 100%;
-    }
-
-    #output {
-      white-space: pre-wrap;
-      height: 400px;
-      overflow-y: auto;
-      border: 1px solid #0f0;
-      padding: 10px;
-      background-color: #000;
-      margin-bottom: 10px;
-    }
-
-    #input {
-      width: 100%;
-      background: #000;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 12px;
-      font-family: monospace;
-      font-size: 16px;
-    }
-
-    @media (max-width: 600px) {
       body {
+        background: #111;
+        color: #0f0;
+        font-family: monospace;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      #nav {
+        margin-bottom: 20px;
+      }
+
+      button {
+        background: #000;
+        color: #0f0;
+        border: 1px solid #0f0;
         padding: 10px;
+        font-family: monospace;
+        cursor: pointer;
+      }
+
+      #home,
+      #terminal {
+        max-width: 100%;
+      }
+
+      #output {
+        white-space: pre-wrap;
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #0f0;
+        padding: 10px;
+        background-color: #000;
+        margin-bottom: 10px;
       }
 
       #input {
-        font-size: 14px;
-        padding: 10px;
+        width: 100%;
+        background: #000;
+        color: #0f0;
+        border: 1px solid #0f0;
+        padding: 12px;
+        font-family: monospace;
+        font-size: 16px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div id="nav">
-    <button onclick="showHome()">🏠 Home</button>
-    <button onclick="showTerminal()">💻 Terminal</button>
-  </div>
 
-  <!-- Home page section -->
-  <div id="home">
-    <h1>Welcome to QuickTix</h1>
-    <p>QuickTix is your terminal-style booking platform.</p>
-    <p>Use our custom command language <strong>SadeScript</strong> to:</p>
-    <ul>
-      <li>Add concert, bus, movie, or flight tickets</li>
-      <li>Book, pay, cancel, or confirm reservations</li>
-      <li>Update available ticket counts</li>
-      <li>And more... all in one line!</li>
-    </ul>
-    <p>Click "Terminal" above to get started.</p>
-  </div>
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
 
-  <!-- Terminal CLI section -->
-  <div id="terminal" class="hidden">
-    <div id="output"></div>
-    <div style="display: flex; gap: 10px;">
-      <input
-        id="input"
-        placeholder="Enter command..."
-        autocomplete="off"
-        autofocus
-        style="flex: 1;"
-      />
-      <button id="sendBtn">Send</button>
+        #input {
+          font-size: 14px;
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nav">
+      <button onclick="showHome()">🏠 Home</button>
+      <button onclick="showTerminal()">💻 Terminal</button>
     </div>
 
-  </div>
+    <!-- Home page section -->
+    <div id="home">
+      <h1>Welcome to QuickTix</h1>
+      <p>QuickTix is your terminal-style booking platform.</p>
+      <p>Use our custom command language <strong>SadeScript</strong> to:</p>
+      <ul>
+        <li>Add concert, bus, movie, or flight tickets</li>
+        <li>Book, pay, cancel, or confirm reservations</li>
+        <li>Update available ticket counts</li>
+        <li>And more... all in one line!</li>
+      </ul>
+      <p>Click "Terminal" above to get started.</p>
 
-  <script>
-    function showHome() {
-      document.getElementById("home").classList.remove("hidden");
-      document.getElementById("terminal").classList.add("hidden");
-    }
+      <section id="docs" style="margin-top: 40px">
+        <h2>📘 Getting Started with SadeScript</h2>
+        <p>
+          Use SadeScript to book and manage tickets using simple command-line
+          syntax.
+        </p>
 
-    function showTerminal() {
-      document.getElementById("terminal").classList.remove("hidden");
-      document.getElementById("home").classList.add("hidden");
-      document.getElementById("input").focus();
-    }
+        <div style="margin-top: 20px">
+          <h3>🆕 Add a Ticket</h3>
+          <pre>
+  ADD BUS "Kingston to Montego Bay" AT "Bus Terminal" IN "Kingston" FROM 2025-06-01 TO 2025-06-01 PRICE 20 TO 40
+  ADD CONCERT "Mello Vibes" AT "Sabina Park" IN "Kingston" FROM 2025-04-20 TO 2025-04-21 PRICE 50 TO 80
+      </pre
+          >
 
-    const input = document.getElementById("input");
-    const output = document.getElementById("output");
+          <h3>📍 List Tickets in a Location</h3>
+          <pre>
+  LIST EVENTS IN "Kingston"
+      </pre
+          >
 
-    document.getElementById("sendBtn").addEventListener("click", sendCommand);
+          <h3>🎟️ Book a Ticket</h3>
+          <pre>
+  BOOK "Mello Vibes" ON 2025-04-20 FOR "John Doe"
+      </pre
+          >
 
-    function sendCommand() {
-      const command = input.value
-        .replace(/[“”]/g, '"')
-        .replace(/[‘’]/g, "'");
+          <h3>✅ Confirm a Booking</h3>
+          <pre>
+  CONFIRM BOOKING 1001
+      </pre
+          >
 
-      if (command.trim() === "") return;
+          <h3>💳 Pay for a Booking</h3>
+          <pre>
+  PAY FOR BOOKING 1001
+      </pre
+          >
 
-      appendToOutput(`>> ${command}`, true);
-      input.value = "";
+          <h3>❌ Cancel a Booking</h3>
+          <pre>
+  CANCEL BOOKING 1001
+      </pre
+          >
 
-      fetch("/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command }),
-      })
-        .then(res => res.text())
-        .then(data => appendToOutput(data));
-    }
+          <h3>🔄 Update Ticket Availability</h3>
+          <pre>
+  UPDATE EVENT "Mello Vibes" WITH 20 NEW TICKETS
+      </pre
+          >
+        </div>
+      </section>
+    </div>
 
+    <!-- Terminal CLI section -->
+    <div id="terminal" class="hidden">
+      <div id="output"></div>
+      <div style="display: flex; gap: 10px">
+        <input
+          id="input"
+          placeholder="Enter command..."
+          autocomplete="off"
+          autofocus
+          style="flex: 1"
+        />
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
 
-    input.addEventListener("keydown", async function (e) {
-      if (e.key === "Enter") {
-        sendCommand();
+    <script>
+      function showHome() {
+        document.getElementById("home").classList.remove("hidden");
+        document.getElementById("terminal").classList.add("hidden");
       }
-    });
 
-    function appendToOutput(text, isCommand = false) {
-      const line = document.createElement("div");
-      line.textContent = text;
-      line.style.margin = "5px 0";
-      line.style.color = isCommand ? "#0ff" : "#0f0";
-      line.style.whiteSpace = "pre-wrap";
-      line.style.textAlign = isCommand ? "right" : "left";
-      output.appendChild(line);
-      output.scrollTop = output.scrollHeight;
-    }
+      function showTerminal() {
+        document.getElementById("terminal").classList.remove("hidden");
+        document.getElementById("home").classList.add("hidden");
+        document.getElementById("input").focus();
+      }
 
-  </script>
-</body>
+      const input = document.getElementById("input");
+      const output = document.getElementById("output");
+
+      document.getElementById("sendBtn").addEventListener("click", sendCommand);
+
+      function sendCommand() {
+        const command = input.value.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
+        if (command.trim() === "") return;
+
+        appendToOutput(`>> ${command}`, true);
+        input.value = "";
+
+        fetch("/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command }),
+        })
+          .then((res) => res.text())
+          .then((data) => appendToOutput(data));
+      }
+
+      input.addEventListener("keydown", async function (e) {
+        if (e.key === "Enter") {
+          sendCommand();
+        }
+      });
+
+      function appendToOutput(text, isCommand = false) {
+        const line = document.createElement("div");
+        line.textContent = text;
+        line.style.margin = "5px 0";
+        line.style.color = isCommand ? "#0ff" : "#0f0";
+        line.style.whiteSpace = "pre-wrap";
+        line.style.textAlign = isCommand ? "right" : "left";
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
+      }
+    </script>
+  </body>
 </html>
