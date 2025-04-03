@@ -22,7 +22,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Serve index.html at root
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
-    with open("static/index.html") as f:
+    with open("static/index.html", encoding="utf-8") as f:
         return f.read()
 
 class Command(BaseModel):

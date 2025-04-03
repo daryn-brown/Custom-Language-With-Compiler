@@ -68,6 +68,18 @@ def p_list_events(p):
     except Exception as e:
         print(f"❌ Failed to fetch events: {e}")
 
+def p_list_all_events(p):
+    'command : LIST EVENTS'
+    print("📍 All Events:")
+    try:
+        query = "SELECT * FROM c"
+        for item in container.query_items(query=query, enable_cross_partition_query=True):
+            print(f"- {item['title']} ({item.get('type', 'event')}) at {item['venue']} in {item['location']} from {item['startDate']} to {item['endDate']}, "
+                  f"${item['priceMin']} - ${item['priceMax']} ({item['available_tickets']} tickets left)")
+    except Exception as e:
+        print(f"❌ Failed to fetch events: {e}")
+
+
 
 def p_book_event(p):
     'command : BOOK STRING ON DATE FOR STRING'
