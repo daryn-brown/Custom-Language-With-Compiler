@@ -1,0 +1,27 @@
+name: Sync with upstream
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # every hour
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Configure Git
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+
+      - name: Pull upstream changes
+        run: |
+          git remote add upstream https://github.com/ManOnTheMoonXIX/Custom-Language-With-Compiler.git
+          git fetch upstream
+          git checkout gui
+          git merge upstream/gui --allow-unrelated-histories
+          git push origin gui
