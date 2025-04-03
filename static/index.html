@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>QuickTix - SadeScript CLI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickTix</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: #111;
       color: #0f0;
@@ -12,7 +17,11 @@
       padding: 20px;
     }
 
-    nav {
+    .hidden {
+      display: none;
+    }
+
+    #nav {
       margin-bottom: 20px;
     }
 
@@ -20,27 +29,23 @@
       background: #000;
       color: #0f0;
       border: 1px solid #0f0;
-      padding: 8px 12px;
+      padding: 10px;
       font-family: monospace;
-      margin-right: 10px;
       cursor: pointer;
     }
 
-    .page {
-      display: none;
-    }
-
-    #home {
-      display: block;
+    #home, #terminal {
+      max-width: 100%;
     }
 
     #output {
       white-space: pre-wrap;
-      margin-bottom: 10px;
       height: 400px;
       overflow-y: auto;
       border: 1px solid #0f0;
       padding: 10px;
+      background-color: #000;
+      margin-bottom: 10px;
     }
 
     #input {
@@ -48,34 +53,45 @@
       background: #000;
       color: #0f0;
       border: 1px solid #0f0;
-      padding: 10px;
+      padding: 12px;
       font-family: monospace;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      #input {
+        font-size: 14px;
+        padding: 10px;
+      }
     }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
-  <nav>
-    <button onclick="showPage('home')">🏠 Home</button>
-    <button onclick="showPage('terminal')">💻 Terminal</button>
-  </nav>
-
-  <!-- Homepage -->
-  <div id="home" class="page">
-    <h1>Welcome to QuickTix 🎟️</h1>
-    <p>QuickTix is a terminal-style ticket booking system powered by <strong>SadeScript</strong>.</p>
-    <p>Use SadeScript to:</p>
-    <ul>
-      <li>🚌 Book bus tickets</li>
-      <li>🎤 Reserve concert seats</li>
-      <li>🎟️ Manage events with custom syntax</li>
-    </ul>
-    <p>Switch to the Terminal tab to try it out!</p>
+  <div id="nav">
+    <button onclick="showHome()">🏠 Home</button>
+    <button onclick="showTerminal()">💻 Terminal</button>
   </div>
 
-  <!-- Terminal Page -->
-  <div id="terminal" class="page">
+  <!-- Home page section -->
+  <div id="home">
+    <h1>Welcome to QuickTix</h1>
+    <p>QuickTix is your terminal-style booking platform.</p>
+    <p>Use our custom command language <strong>SadeScript</strong> to:</p>
+    <ul>
+      <li>Add concert, bus, movie, or flight tickets</li>
+      <li>Book, pay, cancel, or confirm reservations</li>
+      <li>Update available ticket counts</li>
+      <li>And more... all in one line!</li>
+    </ul>
+    <p>Click "Terminal" above to get started.</p>
+  </div>
+
+  <!-- Terminal CLI section -->
+  <div id="terminal" class="hidden">
     <div id="output"></div>
     <input
       id="input"
@@ -85,25 +101,22 @@
     />
   </div>
 
-  <!-- Script -->
   <script>
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-      document.getElementById(pageId).style.display = 'block';
+    function showHome() {
+      document.getElementById("home").classList.remove("hidden");
+      document.getElementById("terminal").classList.add("hidden");
+    }
 
-      // Refocus input on terminal switch
-      if (pageId === 'terminal') {
-        setTimeout(() => {
-          const input = document.getElementById("input");
-          if (input) input.focus();
-        }, 50);
-      }
+    function showTerminal() {
+      document.getElementById("terminal").classList.remove("hidden");
+      document.getElementById("home").classList.add("hidden");
+      document.getElementById("input").focus();
     }
 
     const input = document.getElementById("input");
     const output = document.getElementById("output");
 
-    input?.addEventListener("keydown", async function (e) {
+    input.addEventListener("keydown", async function (e) {
       if (e.key === "Enter") {
         const command = input.value
           .replace(/[“”]/g, '"')
@@ -114,9 +127,8 @@
         const res = await fetch("/run", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command })
+          body: JSON.stringify({ command }),
         });
-
         const data = await res.text();
         appendToOutput(data);
       }
@@ -127,6 +139,5 @@
       output.scrollTop = output.scrollHeight;
     }
   </script>
-
 </body>
 </html>
