@@ -2,7 +2,6 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 from parser import parser
 
-print("Welcome to the Ticket Booking System CLI")
 print("Enter your commands or type 'exit' to quit.")
 
 while True:
