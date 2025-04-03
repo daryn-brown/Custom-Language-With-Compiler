@@ -2,7 +2,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 from parser import parser
 
-print("Enter your commands or type 'exit' to quit.")
+
 
 while True:
     try:
@@ -12,3 +12,5 @@ while True:
         parser.parse(user_input)
     except EOFError:
         break
+
+print("Enter your commands")
