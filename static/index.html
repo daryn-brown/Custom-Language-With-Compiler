@@ -93,12 +93,17 @@
   <!-- Terminal CLI section -->
   <div id="terminal" class="hidden">
     <div id="output"></div>
-    <input
-      id="input"
-      placeholder="Enter command..."
-      autocomplete="off"
-      autofocus
-    />
+    <div style="display: flex; gap: 10px;">
+      <input
+        id="input"
+        placeholder="Enter command..."
+        autocomplete="off"
+        autofocus
+        style="flex: 1;"
+      />
+      <button id="sendBtn">Send</button>
+    </div>
+
   </div>
 
   <script>
@@ -116,21 +121,31 @@
     const input = document.getElementById("input");
     const output = document.getElementById("output");
 
+    document.getElementById("sendBtn").addEventListener("click", sendCommand);
+
+    function sendCommand() {
+      const command = input.value
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'");
+
+      if (command.trim() === "") return;
+
+      appendToOutput(`>> ${command}`);
+      input.value = "";
+
+      fetch("/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command }),
+      })
+        .then(res => res.text())
+        .then(data => appendToOutput(data));
+    }
+
+
     input.addEventListener("keydown", async function (e) {
       if (e.key === "Enter") {
-        const command = input.value
-          .replace(/[“”]/g, '"')
-          .replace(/[‘’]/g, "'");
-        appendToOutput(`>> ${command}`);
-        input.value = "";
-
-        const res = await fetch("/run", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command }),
-        });
-        const data = await res.text();
-        appendToOutput(data);
+        sendCommand();
       }
     });
 
