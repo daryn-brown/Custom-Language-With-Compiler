@@ -37,9 +37,11 @@ def t_DATE(t):
     return t
 
 def t_STRING(t):
-    r'"[^"]*"'
-    t.value = t.value.strip('"')
+    r'["“”][^"“”]+["“”]|\b[a-zA-Z][a-zA-Z0-9_]*\b'
+    t.type = reserved.get(t.value.upper(), 'STRING')
+    t.value = t.value.strip('"“”')  # Strip all quote types
     return t
+
 
 def t_WORD(t):
     r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
