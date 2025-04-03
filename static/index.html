@@ -130,7 +130,7 @@
 
       if (command.trim() === "") return;
 
-      appendToOutput(`>> ${command}`);
+      appendToOutput(`>> ${command}`, true);
       input.value = "";
 
       fetch("/run", {
@@ -149,10 +149,17 @@
       }
     });
 
-    function appendToOutput(text) {
-      output.textContent += text + "\n";
+    function appendToOutput(text, isCommand = false) {
+      const line = document.createElement("div");
+      line.textContent = text;
+      line.style.margin = "5px 0";
+      line.style.color = isCommand ? "#0ff" : "#0f0";
+      line.style.whiteSpace = "pre-wrap";
+      line.style.textAlign = isCommand ? "right" : "left";
+      output.appendChild(line);
       output.scrollTop = output.scrollHeight;
     }
+
   </script>
 </body>
 </html>
