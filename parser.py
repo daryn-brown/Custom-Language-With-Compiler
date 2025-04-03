@@ -161,4 +161,4 @@ def p_error(p):
     else:
         print("Syntax error at end of input.")
 
-parser = yacc.yacc(debug=True, write_tables=False)
+parser = yacc.yacc(debug=False, write_tables=False)

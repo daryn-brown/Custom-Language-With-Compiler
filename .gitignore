@@ -1,4 +1,4 @@
 .env
-        __pycache__/
-        db_test.py
-        parser.out
+__pycache__/
+db_test.py
+parser.out
