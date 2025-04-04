@@ -37,9 +37,8 @@ def t_DATE(t):
     return t
 
 def t_STRING(t):
-    r'["“”][^"“”]+["“”]|\b[a-zA-Z][a-zA-Z0-9_]*\b'
-    t.type = reserved.get(t.value.upper(), 'STRING')
-    t.value = t.value.strip('"“”')  # Strip all quote types
+    r'["“”][^"“”]+["“”]'  # Only match quoted strings
+    t.value = t.value.strip('"“”')
     return t
 
 
