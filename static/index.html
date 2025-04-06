@@ -376,6 +376,23 @@
         color: var(--number);
       }
 
+      /* Fixed styles for terminal output highlighting */
+      .terminal-output-response .keyword {
+        color: var(--keyword) !important;
+      }
+
+      .terminal-output-response .string {
+        color: var(--string) !important;
+      }
+
+      .terminal-output-response .number {
+        color: var(--number) !important;
+      }
+
+      .terminal-output-response .command {
+        color: var(--command) !important;
+      }
+
       @media (max-width: 640px) {
         .command-cards {
           grid-template-columns: 1fr;
@@ -674,7 +691,15 @@
           body: JSON.stringify({ command }),
         })
           .then((res) => res.text())
-          .then((data) => appendToOutput(data))
+          .then((data) => {
+            // Check if the response is coming with HTML already
+            if (data.includes("<span") || data.includes("<div")) {
+              appendToOutput(data);
+            } else {
+              // If it's plain text, format it with proper response styling
+              appendToOutput(data);
+            }
+          })
           .catch((error) => appendToOutput(`Error: ${error.message}`));
       }
 
@@ -691,9 +716,9 @@
         }`;
 
         if (isCommand) {
-          line.innerHTML = `❯ ${highlightCommand(text)}`;
+          line.innerHTML = `❯ ${text.substring(3)}`; // Remove the ">> " prefix
         } else {
-          line.textContent = text;
+          line.innerHTML = text;
         }
 
         output.appendChild(line);
@@ -701,7 +726,15 @@
       }
 
       function highlightCommand(text) {
-        return text
+        // Remove the ">> " prefix if it exists
+        const commandText = text.replace(/^>>\s*/, "");
+
+        // Escape HTML characters to prevent XSS
+        const escapedText = commandText
+          .replace(/>/g, "&gt;")
+          .replace(/</g, "&lt;");
+
+        return escapedText
           .replace(
             /(ADD|BOOK|CANCEL|CONFIRM|LIST|PAY|UPDATE|BUS|CONCERT|EVENTS|EVENT|BOOKING|NEW|TICKETS|FOR|FROM|IN|ON|PRICE|TO|WITH|AT)/g,
             '<span class="keyword">$1</span>'
