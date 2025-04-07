@@ -109,8 +109,22 @@ def p_command(p):
                | cancel_booking
                | update_event
                | add_event
+               | help_command
                | word_command'''
     p[0] = p[1]
+
+def p_help_command(p):
+    '''help_command : HELP'''
+    p[0] = "\n📋 Available Commands:\n" \
+           "📋 LIST EVENTS - Show all available events\n" \
+           "📍 LIST EVENTS IN [location] - Show events in a specific location\n" \
+           "🎟️ BOOK [event_id] [quantity] - Book tickets for an event\n" \
+           "✅ CONFIRM [booking_code] - Confirm a booking\n" \
+           "💳 PAY [booking_code] [amount] - Make a payment\n" \
+           "❌ CANCEL [booking_code] - Cancel a booking\n" \
+           "🔄 UPDATE [booking_code] [new_quantity] - Update booking quantity\n" \
+           "➕ ADD EVENT [title] [venue] [location] [start_date] [end_date] [price_min] [price_max] [available_tickets] - Add a new event" 
+               
 
 def p_list_events(p):
     '''list_events : LIST EVENTS IN STRING

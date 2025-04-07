@@ -36,7 +36,8 @@ reserved = {
     'AT': 'AT',
     'FROM': 'FROM',
     'TO': 'TO',
-    'PRICE': 'PRICE'
+    'PRICE': 'PRICE',
+    'HELP': 'HELP'
 }
 
 # Tokens
