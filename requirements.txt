@@ -3,3 +3,9 @@ uvicorn
 ply
 python-dotenv
 azure-cosmos
+pytest
+pydantic
+starlette
+typing-extensions
+python-multipart
+google-generativeai

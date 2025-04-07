@@ -318,6 +318,7 @@
         display: flex;
         padding: 1rem;
         gap: 10px;
+        position: relative;
       }
 
       .terminal-input {
@@ -330,6 +331,39 @@
         font-family: "Fira Code", monospace;
         font-size: 0.875rem;
         outline: none;
+      }
+
+      .terminal-suggestion {
+        position: absolute;
+        bottom: calc(1rem + 2.5rem); /* Position ABOVE the input */
+        left: 1rem;
+        right: 1rem; /* Extend to full width */
+        font-family: "Fira Code", monospace;
+        font-size: 0.875rem;
+        color: #516379;
+        background-color: rgba(18, 27, 41, 0.95);
+        padding: 0.75rem;
+        pointer-events: none;
+        white-space: normal; /* Allow text to wrap */
+        overflow: visible;
+        z-index: 20;
+        border: 2px solid rgba(45, 145, 240, 0.7);
+        border-radius: 0.375rem;
+        max-width: 100%; /* Use full width */
+        display: none; /* Hide by default */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        word-break: break-all; /* Break long words */
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .terminal-suggestion-active {
+        color: var(--text-white);
+      }
+
+      .terminal-suggestion-hint {
+        color: #6a89b7;
+        font-weight: bold;
       }
 
       .terminal-input:focus {
@@ -565,7 +599,7 @@
                   <div class="command-code">
                     <span class="keyword">CONFIRM</span>
                     <span class="keyword">BOOKING</span>
-                    <span class="number">1001</span>
+                    <span class="string">"QTX-5005"</span>
                   </div>
                 </div>
               </div>
@@ -579,7 +613,7 @@
                     <span class="keyword">PAY</span>
                     <span class="keyword">FOR</span>
                     <span class="keyword">BOOKING</span>
-                    <span class="number">1001</span>
+                    <span class="string">"QTX-5005"</span>
                   </div>
                 </div>
               </div>
@@ -592,7 +626,7 @@
                   <div class="command-code">
                     <span class="keyword">CANCEL</span>
                     <span class="keyword">BOOKING</span>
-                    <span class="number">1001</span>
+                    <span class="string">"QTX-5005"</span>
                   </div>
                 </div>
               </div>
@@ -643,6 +677,7 @@
                   autocomplete="off"
                   autofocus
                 />
+                <div id="suggestion" class="terminal-suggestion"></div>
                 <button id="sendBtn" class="terminal-run-button">Send</button>
               </div>
             </div>
@@ -673,8 +708,179 @@
 
       const input = document.getElementById("input");
       const output = document.getElementById("output");
+      const suggestion = document.getElementById("suggestion");
 
       document.getElementById("sendBtn").addEventListener("click", sendCommand);
+
+      // Debounce function to limit API calls
+      function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            func.apply(this, args);
+          }, timeout);
+        };
+      }
+
+      // Get suggestions from the API
+      const getSuggestions = debounce(async (text) => {
+        if (!text || text.length < 1) {
+          suggestion.innerHTML = "";
+          suggestion.style.display = "none";
+          return;
+        }
+
+        // Use local suggestions for immediate response
+        const localSuggestions = {
+          LI: "LIST EVENTS",
+          LIS: "LIST EVENTS",
+          LIST: "LIST EVENTS",
+          "LIST E": "LIST EVENTS",
+          "LIST EV": "LIST EVENTS",
+          "LIST EVE": "LIST EVENTS",
+          "LIST EVEN": "LIST EVENTS",
+          "LIST EVENT": "LIST EVENTS",
+          "LIST EVENTS I": 'LIST EVENTS IN "Kingston"',
+          B: 'BOOK "Event Name" ON 2024-12-31 FOR "Person Name"',
+          BO: 'BOOK "Event Name" ON 2024-12-31 FOR "Person Name"',
+          BOO: 'BOOK "Event Name" ON 2024-12-31 FOR "Person Name"',
+          BOOK: 'BOOK "Event Name" ON 2024-12-31 FOR "Person Name"',
+          C: 'CONFIRM "QTX-1234"',
+          CO: 'CONFIRM "QTX-1234"',
+          CON: 'CONFIRM "QTX-1234"',
+          CONF: 'CONFIRM "QTX-1234"',
+          CONFI: 'CONFIRM "QTX-1234"',
+          CONFIR: 'CONFIRM "QTX-1234"',
+          CONFIRM: 'CONFIRM "QTX-1234"',
+          P: 'PAY "QTX-1234" 100',
+          PA: 'PAY "QTX-1234" 100',
+          PAY: 'PAY "QTX-1234" 100',
+          CA: 'CANCEL "QTX-1234"',
+          CAN: 'CANCEL "QTX-1234"',
+          CANC: 'CANCEL "QTX-1234"',
+          CANCE: 'CANCEL "QTX-1234"',
+          CANCEL: 'CANCEL "QTX-1234"',
+          U: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          UP: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          UPD: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          UPDA: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          UPDAT: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          UPDATE: 'UPDATE EVENT "Event Name" WITH 10 NEW TICKETS',
+          A: 'ADD EVENT "Title" AT "Venue" IN "Location" FROM 2024-12-31 TO 2024-12-31 PRICE 50 TO 100',
+          AD: 'ADD EVENT "Title" AT "Venue" IN "Location" FROM 2024-12-31 TO 2024-12-31 PRICE 50 TO 100',
+          ADD: 'ADD EVENT "Title" AT "Venue" IN "Location" FROM 2024-12-31 TO 2024-12-31 PRICE 50 TO 100',
+        };
+
+        // Try local suggestions first (instant response)
+        const upperText = text.toUpperCase();
+        let suggestionText = "";
+
+        // Direct match
+        if (localSuggestions[upperText]) {
+          suggestionText = localSuggestions[upperText];
+        } else {
+          // Find prefix matches
+          for (const key in localSuggestions) {
+            if (key.startsWith(upperText)) {
+              suggestionText = localSuggestions[key];
+              break;
+            }
+          }
+
+          // If still no match, see if any key is a prefix of input
+          if (!suggestionText) {
+            for (const key in localSuggestions) {
+              if (upperText.startsWith(key)) {
+                suggestionText = localSuggestions[key];
+                break;
+              }
+            }
+          }
+        }
+
+        // Only fetch from API if no local match
+        if (!suggestionText && text.length >= 2) {
+          try {
+            const response = await fetch(
+              `/suggest/${encodeURIComponent(text)}`
+            );
+            suggestionText = await response.text();
+          } catch (error) {
+            console.error("Error getting suggestions:", error);
+          }
+        }
+
+        if (
+          suggestionText &&
+          suggestionText.trim() !== "" &&
+          suggestionText !== text
+        ) {
+          // Format the suggestion to show the already typed part differently
+          const typed = text;
+          let completion = "";
+
+          if (suggestionText.startsWith(typed)) {
+            completion = suggestionText.substring(typed.length);
+          } else {
+            completion = suggestionText;
+          }
+
+          // Only show if there's actual completion text
+          if (completion.trim() !== "") {
+            console.log(
+              "Showing suggestion - typed:",
+              typed,
+              "completion:",
+              completion
+            );
+
+            suggestion.innerHTML = `
+              <div style="font-weight: bold; margin-bottom: 5px; color: #85aeff;">Command suggestion:</div>
+              <div><span class="terminal-suggestion-active">${typed}</span><span class="terminal-suggestion-hint">${completion}</span></div>
+              <div style="margin-top: 5px; font-size: 0.8em; color: #8596b1;">(Press TAB to complete)</div>
+            `;
+
+            // Show suggestion
+            suggestion.style.display = "block";
+          } else {
+            suggestion.innerHTML = "";
+            suggestion.style.display = "none";
+          }
+        } else {
+          suggestion.innerHTML = "";
+          suggestion.style.display = "none";
+        }
+      }, 50); // Reduced debounce time for faster feedback
+
+      // Handle input changes to update suggestions
+      input.addEventListener("input", function () {
+        getSuggestions(input.value);
+      });
+
+      // Handle tab key to complete suggestions
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Tab") {
+          e.preventDefault();
+
+          const hintElement = suggestion.querySelector(
+            ".terminal-suggestion-hint"
+          );
+          if (hintElement && hintElement.textContent) {
+            input.value = input.value + hintElement.textContent;
+            suggestion.innerHTML = "";
+            suggestion.style.display = "none";
+            input.focus();
+          }
+        } else if (e.key === "Enter") {
+          sendCommand();
+          suggestion.innerHTML = "";
+          suggestion.style.display = "none";
+        } else if (e.key === "Escape") {
+          suggestion.innerHTML = "";
+          suggestion.style.display = "none";
+        }
+      });
 
       function sendCommand() {
         const command = input.value.replace(/[""]/g, '"').replace(/['']/g, "'");
@@ -702,12 +908,6 @@
           })
           .catch((error) => appendToOutput(`Error: ${error.message}`));
       }
-
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          sendCommand();
-        }
-      });
 
       function appendToOutput(text, isCommand = false) {
         const line = document.createElement("div");
