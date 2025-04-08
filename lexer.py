@@ -64,11 +64,11 @@ def t_NUMBER(t):
     t.value = int(t.value)
     return t
 
-# Word must come after all exact token matches
 def t_WORD(t):
-    r'[a-zA-Z][a-zA-Z0-9_]*'  # Simplified pattern to avoid conflicts
-    # Check if this word is a reserved keyword
-    t.type = reserved.get(t.value.upper(), 'WORD')
+    r'[a-zA-Z][a-zA-Z0-9_]*'
+    upper = t.value.upper()
+    if upper in reserved:
+        t.type = reserved[upper]
     return t
 
 # Define a rule so we can track line numbers

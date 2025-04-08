@@ -25,77 +25,81 @@ if not all([COSMOS_ENDPOINT, COSMOS_KEY, DATABASE_NAME, CONTAINER_NAME]):
     print("Required variables: COSMOS_ENDPOINT, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER")
     exit(1)
 
-try:
-    client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
-    database = client.get_database_client(DATABASE_NAME)
-    container = database.get_container_client(CONTAINER_NAME)
+client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+database = client.get_database_client(DATABASE_NAME)
+container = database.get_container_client(CONTAINER_NAME)
+
+# try:
+#     client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+#     database = client.get_database_client(DATABASE_NAME)
+#     container = database.get_container_client(CONTAINER_NAME)
     
-    # Verify connection by trying to read container properties
-    container_props = container.read()
-    print("[SUCCESS] Successfully connected to Cosmos DB")
+#     # Verify connection by trying to read container properties
+#     container_props = container.read()
+#     print("[SUCCESS] Successfully connected to Cosmos DB")
     
-    # Add some test events if the container is empty
-    query = "SELECT VALUE COUNT(1) FROM c"
-    count = list(container.query_items(query=query, enable_cross_partition_query=True))[0]
-    if count == 0:
-        print("[INFO] Adding test events to the database...")
-        test_events = [
-            {
-                "id": str(uuid.uuid4()),
-                "type": "event",
-                "title": "Mello Vibes",
-                "venue": "Sabina Park",
-                "location": "Kingston",
-                "startDate": "2024-12-31",
-                "endDate": "2024-12-31",
-                "priceMin": 50.0,
-                "priceMax": 100.0,
-                "available_tickets": 100
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "type": "event",
-                "title": "Kingston to Montego Bay",
-                "venue": "Bus Terminal",
-                "location": "Kingston",
-                "startDate": "2024-12-31",
-                "endDate": "2024-12-31",
-                "priceMin": 20.0,
-                "priceMax": 40.0,
-                "available_tickets": 50
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "type": "event",
-                "title": "Reggae Sumfest",
-                "venue": "Catherine Hall",
-                "location": "Montego Bay",
-                "startDate": "2024-07-15",
-                "endDate": "2024-07-20",
-                "priceMin": 80.0,
-                "priceMax": 150.0,
-                "available_tickets": 200
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "type": "event",
-                "title": "Kingston to Port Antonio",
-                "venue": "Bus Terminal",
-                "location": "Kingston",
-                "startDate": "2024-12-31",
-                "endDate": "2024-12-31",
-                "priceMin": 30.0,
-                "priceMax": 50.0,
-                "available_tickets": 40
-            }
-        ]
-        for event in test_events:
-            container.upsert_item(event)
-        print("[SUCCESS] Added test events successfully")
+#     # Add some test events if the container is empty
+#     query = "SELECT VALUE COUNT(1) FROM c"
+#     count = list(container.query_items(query=query, enable_cross_partition_query=True))[0]
+#     if count == 0:
+#         print("[INFO] Adding test events to the database...")
+#         test_events = [
+#             {
+#                 "id": str(uuid.uuid4()),
+#                 "type": "event",
+#                 "title": "Mello Vibes",
+#                 "venue": "Sabina Park",
+#                 "location": "Kingston",
+#                 "startDate": "2024-12-31",
+#                 "endDate": "2024-12-31",
+#                 "priceMin": 50.0,
+#                 "priceMax": 100.0,
+#                 "available_tickets": 100
+#             },
+#             {
+#                 "id": str(uuid.uuid4()),
+#                 "type": "event",
+#                 "title": "Kingston to Montego Bay",
+#                 "venue": "Bus Terminal",
+#                 "location": "Kingston",
+#                 "startDate": "2024-12-31",
+#                 "endDate": "2024-12-31",
+#                 "priceMin": 20.0,
+#                 "priceMax": 40.0,
+#                 "available_tickets": 50
+#             },
+#             {
+#                 "id": str(uuid.uuid4()),
+#                 "type": "event",
+#                 "title": "Reggae Sumfest",
+#                 "venue": "Catherine Hall",
+#                 "location": "Montego Bay",
+#                 "startDate": "2024-07-15",
+#                 "endDate": "2024-07-20",
+#                 "priceMin": 80.0,
+#                 "priceMax": 150.0,
+#                 "available_tickets": 200
+#             },
+#             {
+#                 "id": str(uuid.uuid4()),
+#                 "type": "event",
+#                 "title": "Kingston to Port Antonio",
+#                 "venue": "Bus Terminal",
+#                 "location": "Kingston",
+#                 "startDate": "2024-12-31",
+#                 "endDate": "2024-12-31",
+#                 "priceMin": 30.0,
+#                 "priceMax": 50.0,
+#                 "available_tickets": 40
+#             }
+#         ]
+#         for event in test_events:
+#             container.upsert_item(event)
+#         print("[SUCCESS] Added test events successfully")
         
-except Exception as e:
-    print(f"[ERROR] Failed to connect to Cosmos DB: {e}")
-    exit(1)
+# except Exception as e:
+#     print(f"[ERROR] Failed to connect to Cosmos DB: {e}")
+#     exit(1)
 
 # Parsing Rules
 def generate_booking_code():
@@ -127,44 +131,45 @@ def p_help_command(p):
                
 
 def p_list_events(p):
-    '''list_events : LIST EVENTS IN STRING
-                  | LIST EVENTS'''
+    '''list_events : LIST EVENTS
+               | LIST EVENTS IN STRING'''
     try:
-        if len(p) == 5:  # LIST EVENTS IN STRING
+        if len(p) == 5:
             location = p[4].strip('"')
-            query = f"SELECT * FROM c WHERE c.location = '{location}' AND c.type != 'booking'"
+            query = f"SELECT * FROM c WHERE LOWER(c.location) = '{location.lower()}' AND c.type != 'booking'"
             events = list(container.query_items(query=query, enable_cross_partition_query=True))
             
             if not events:
-                p[0] = f"No events found in {location}"
+                p[0] = f"\n⚠️ No events found in {location}."
                 return
-                
-            result = f"\nEvents in {location}:\n"
-        else:  # LIST EVENTS
+            
+            result = f"\n📍 Events in {location}:\n"
+        else:
             query = "SELECT * FROM c WHERE c.type != 'booking'"
             events = list(container.query_items(query=query, enable_cross_partition_query=True))
-            
+
             if not events:
-                p[0] = "No events found"
+                p[0] = "\n⚠️ No events found."
                 return
-                
-            result = "\nAll Available Events:\n"
             
+            result = "\n📍 All Available Events:\n"
+
         for event in events:
-            result += f"\nEvent ID: {event.get('id', 'N/A')}"
-            result += f"\nTitle: {event.get('title', 'N/A')}"
-            result += f"\nType: {event.get('type', 'N/A')}"
-            result += f"\nVenue: {event.get('venue', 'N/A')}"
-            result += f"\nLocation: {event.get('location', 'N/A')}"
-            result += f"\nDate: {event.get('startDate', 'N/A')}"
-            result += f"\nPrice Range: ${event.get('priceMin', 0)} - ${event.get('priceMax', 0)}"
-            result += f"\nAvailable Tickets: {event.get('available_tickets', 0)}"
-            result += "\n" + "-"*50 + "\n"
-            
-        p[0] = result
+            result += (
+                f"\n🆔 Event ID: {event.get('id', 'N/A')}"
+                f"\n🎫 Title: {event.get('title', 'N/A')}"
+                f"\n📌 Type: {event.get('type', 'N/A')}"
+                f"\n📍 Venue: {event.get('venue', 'N/A')}, {event.get('location', 'N/A')}"
+                f"\n📅 Date: {event.get('startDate', 'N/A')} to {event.get('endDate', 'N/A')}"
+                f"\n💵 Price Range: ${event.get('priceMin', 0)} - ${event.get('priceMax', 0)}"
+                f"\n🎟️ Tickets Left: {event.get('available_tickets', 0)}"
+                "\n" + "-"*50 + "\n"
+            )
         
+        p[0] = result
+
     except Exception as e:
-        p[0] = f"Error listing events: {str(e)}"
+        p[0] = f"\n❌ Failed to fetch events: {e}"
 
 def p_book_event(p):
     '''book_event : BOOK STRING NUMBER
@@ -178,8 +183,12 @@ def p_book_event(p):
             event = container.read_item(event_id, partition_key=event_id)
             
             if event['available_tickets'] < quantity:
-                p[0] = f"Error: Only {event['available_tickets']} tickets available"
+                p[0] = f"❌ Error: Only {event['available_tickets']} tickets available"
                 return
+                
+            # Update available tickets
+            event['available_tickets'] -= quantity
+            container.replace_item(event['id'], event)
                 
             # Create booking
             booking_id = str(uuid.uuid4())
@@ -195,7 +204,7 @@ def p_book_event(p):
             }
             
             container.upsert_item(booking)
-            p[0] = f"Booking created! Code: {booking_code}"
+            p[0] = f"✅ Booking created! Code: {booking_code}"
             
         else:  # BOOK STRING ON DATE FOR STRING format
             title = p[2].strip('"')
@@ -265,21 +274,32 @@ def p_confirm_booking(p):
         bookings = list(container.query_items(query=query, enable_cross_partition_query=True))
         
         if not bookings:
-            p[0] = "Booking not found"
+            p[0] = "❌ Booking not found"
             return
             
         booking = bookings[0]
         if booking['status'] != 'pending':
-            p[0] = f"Booking is already {booking['status']}"
+            p[0] = f"❌ Booking is already {booking['status']}"
+            return
+        
+        # Verify tickets are still available
+        event = container.read_item(booking['event_id'], partition_key=booking['event_id'])
+        if event['available_tickets'] < booking['quantity']:
+            booking['status'] = 'cancelled'
+            container.replace_item(booking['id'], booking)
+            p[0] = "❌ Booking cancelled: tickets no longer available"
             return
             
         booking['status'] = 'confirmed'
+        event['available_tickets'] -= booking['quantity']
+        container.replace_item(event['id'], event)
         container.replace_item(booking['id'], booking)
-        p[0] = f"Booking {booking_code} confirmed successfully"
+
+        p[0] = f"✅ Booking {booking_code} confirmed successfully"
         
     except Exception as e:
-        p[0] = f"Error confirming booking: {str(e)}"
-
+        p[0] = f"❌ Error confirming booking: {str(e)}"
+        
 def p_pay_booking(p):
     '''pay_booking : PAY STRING NUMBER
                   | PAY FOR BOOKING STRING NUMBER'''
@@ -329,12 +349,12 @@ def p_cancel_booking(p):
         bookings = list(container.query_items(query=query, enable_cross_partition_query=True))
         
         if not bookings:
-            p[0] = "Booking not found"
+            p[0] = "❌ Booking not found"
             return
             
         booking = bookings[0]
         if booking['status'] == 'cancelled':
-            p[0] = "Booking is already cancelled"
+            p[0] = "❌ Booking is already cancelled"
             return
             
         # Get event to restore tickets
@@ -344,73 +364,102 @@ def p_cancel_booking(p):
         
         booking['status'] = 'cancelled'
         container.replace_item(booking['id'], booking)
-        p[0] = f"Booking {booking_code} cancelled successfully"
+        p[0] = f"✅ Booking {booking_code} cancelled and {booking['quantity']} ticket(s) restored"
         
     except Exception as e:
-        p[0] = f"Error cancelling booking: {str(e)}"
-
+        p[0] = f"❌ Error cancelling booking: {str(e)}"
+        
 def p_update_event(p):
-    '''update_event : UPDATE STRING NUMBER
-                   | UPDATE EVENT STRING WITH NUMBER NEW TICKETS'''
-    try:
-        if len(p) == 4:  # UPDATE STRING NUMBER format
-            event_id = p[2].strip('"')
-            new_tickets = int(p[3])
-        else:  # UPDATE EVENT STRING WITH NUMBER NEW TICKETS format
-            event_id = p[3].strip('"')
-            new_tickets = int(p[5])
-        
-        event = container.read_item(event_id, partition_key=event_id)
-        event['available_tickets'] = new_tickets
-        container.replace_item(event['id'], event)
-        
-        p[0] = f"Event {event_id} updated with {new_tickets} available tickets"
-        
-    except Exception as e:
-        p[0] = f"Error updating event: {str(e)}"
+    'update_event : UPDATE EVENT STRING WITH NUMBER NEW TICKETS'
+    title = p[3].strip('"')
+    new_tickets = int(p[5])
 
-def p_add_event(p):
-    '''add_event : ADD EVENT STRING STRING STRING DATE DATE NUMBER NUMBER NUMBER
-                | ADD EVENT STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'''
     try:
-        if len(p) == 11:  # Original format
-            title = p[3].strip('"')
-            venue = p[4].strip('"')
-            location = p[5].strip('"')
-            start_date = p[6]
-            end_date = p[7]
-            price_min = float(p[8])
-            price_max = float(p[9])
-            available_tickets = int(p[10])
-        else:  # New format with AT, IN, FROM, TO, PRICE
-            title = p[3].strip('"')
-            venue = p[5].strip('"')
-            location = p[7].strip('"')
-            start_date = p[9]
-            end_date = p[11]
-            price_min = float(p[13])
-            price_max = float(p[15])
-            available_tickets = 100  # Default for new format
-        
-        event_id = str(uuid.uuid4())
-        event = {
-            "id": event_id,
-            "type": "event",
-            "title": title,
-            "venue": venue,
-            "location": location,
-            "startDate": start_date,
-            "endDate": end_date,
-            "priceMin": price_min,
-            "priceMax": price_max,
-            "available_tickets": available_tickets
-        }
-        
-        container.upsert_item(event)
-        p[0] = f"Event {title} added successfully with ID: {event_id}"
-        
+        query = f"SELECT * FROM c WHERE c.title = '{title}'"
+        results = list(container.query_items(query=query, enable_cross_partition_query=True))
+        if not results:
+            print("❌ Event not found.")
+            return
+        event = results[0]
+        event['available_tickets'] += new_tickets
+        container.replace_item(event['id'], event)
+        print(f"🔁 Updated '{title}' with {new_tickets} new tickets.")
     except Exception as e:
-        p[0] = f"Error adding event: {str(e)}"
+        print(f"❌ Update error: {e}")
+
+# def p_add_event(p):
+#     '''add_event : ADD WORD STRING STRING STRING DATE DATE NUMBER NUMBER NUMBER
+#                 | ADD WORD STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'''
+#     try:
+#         if len(p) == 11:  # Original format
+#             title = p[3].strip('"')
+#             venue = p[4].strip('"')
+#             location = p[5].strip('"')
+#             start_date = p[6]
+#             end_date = p[7]
+#             price_min = float(p[8])
+#             price_max = float(p[9])
+#             available_tickets = int(p[10])
+#         else:  # New format with AT, IN, FROM, TO, PRICE
+#             title = p[3].strip('"')
+#             venue = p[5].strip('"')
+#             location = p[7].strip('"')
+#             start_date = p[9]
+#             end_date = p[11]
+#             price_min = float(p[13])
+#             price_max = float(p[15])
+#             available_tickets = 100  # Default for new format
+        
+#         event_id = str(uuid.uuid4())
+#         event = {
+#             "id": event_id,
+#             "type": item_type,
+#             "title": title,
+#             "venue": venue,
+#             "location": location,
+#             "startDate": start_date,
+#             "endDate": end_date,
+#             "priceMin": price_min,
+#             "priceMax": price_max,
+#             "available_tickets": available_tickets
+#         }
+        
+#         container.upsert_item(event)
+#         p[0] = f"Event {title} added successfully with ID: {event_id}"
+        
+#     except Exception as e:
+#         p[0] = f"Error adding event: {str(e)}"
+def p_add_event(p):
+    'add_event : ADD WORD STRING AT STRING IN STRING FROM DATE TO DATE PRICE NUMBER TO NUMBER'
+    item_type = p[2].lower() + " ticket"  # e.g., "concert ticket", "bus ticket"
+    title = p[3]
+    venue = p[5]
+    location = p[7]
+    start = p[9]
+    end = p[11]
+    price_min = float(p[13])
+    price_max = float(p[15])
+
+    event_id = str(uuid.uuid4())
+
+    event_data = {
+        "id": event_id,
+        "type": item_type,
+        "title": title,
+        "venue": venue,
+        "location": location,
+        "startDate": start,
+        "endDate": end,
+        "priceMin": price_min,
+        "priceMax": price_max,
+        "available_tickets": 100
+    }
+
+    try:
+        container.upsert_item(event_data)
+        print(f"✅ Added '{title}' ({item_type}) with ID: {event_id}")
+    except Exception as e:
+        print(f"❌ Failed to insert: {e}")
 
 # Add a new rule that explicitly uses the WORD token
 def p_word_command(p):
@@ -420,12 +469,12 @@ def p_word_command(p):
 # Improved error handling
 def p_error(p):
     if p:
-        error_msg = f"Syntax error: unexpected '{p.value}'"
+        error_msg = f"❌ Syntax error: unexpected '{p.value}'. Type 'help' for available commands."
         print(error_msg)
         return error_msg
     else:
-        error_msg = "Syntax error: unexpected end of command"
+        error_msg = "❌ Syntax error: unexpected end of command. Type 'help' for available commands."
         print(error_msg)
         return error_msg
 
-parser = yacc.yacc(debug=False, write_tables=False, errorlog=yacc.NullLogger()) 
+parser = yacc.yacc(debug=False, write_tables=False, errorlog=yacc.NullLogger())

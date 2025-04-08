@@ -1,41 +1,23 @@
-import os
+# Group Members: 
+# Justin Alder 2007273
+# Daryn Brown 2002414
+# Marvis Haughton 1802529
+# Peta Gaye Mundle 1403906 
+# Cassandra Powell 2005742
+
 import sys
-from dotenv import load_dotenv
+sys.stdout.reconfigure(encoding='utf-8')
 from parser import parser
 
-# Ensure UTF-8 encoding for Unicode support
-sys.stdout.reconfigure(encoding='utf-8')
 
-# Load environment variables
-load_dotenv()
 
-def main():
-    print("🎫 Welcome to QuickTix CLI!")
-    print("ℹ️ Type 'help' for available commands or start typing to see suggestions.")
-    print("💡 Type 'exit' to quit the CLI.")
-
-    while True:
-        try:
-            # Get user input
-            user_input = input("QuickTix> ").strip()
-            
-            if not user_input:
-                continue
-
-            # Parse and execute the command
-            try:
-                result = parser.parse(user_input)
-                if result:
-                    print(result)
-            except Exception as e:
-                print(f"❌ Error executing command: {e}")
-        
-        except KeyboardInterrupt:
-            print("\n👋 Goodbye!")
+while True:
+    try:
+        user_input = input(">> ")
+        if user_input.lower() == 'exit':
             break
-        except EOFError:
-            print("\n👋 Goodbye!")
-            break
+        parser.parse(user_input)
+    except EOFError:
+        break
 
-if __name__ == "__main__":
-    main()
+print("Enter your commands")
